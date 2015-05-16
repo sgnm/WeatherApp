@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -16,16 +19,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 
 public class MainActivity extends ActionBarActivity {
 
     private RequestQueue reqQueue;
-    private static final String weatherUrl = "http://api.openweathermap.org/data/2.5/forecast?lat=35&lon=139";
+    private static final String weatherUrl = "http://api.openweathermap.org/data/2.5/forecast?id=1850147";
+
+    double rain;
+
+    @InjectView(R.id.textView) TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.inject(this);
 
         getWeatherData();
     }
@@ -37,7 +48,13 @@ public class MainActivity extends ActionBarActivity {
             public void onResponse(JSONObject response) {
                 try {
                     JSONArray array = response.getJSONArray("list");
-                    Log.d("data", array.toString());
+                    JSONObject obj = array.getJSONObject(0);
+                    JSONObject rainObj = obj.getJSONObject("rain");
+                    rain = rainObj.getDouble("3h");
+                    textView.setText(String.valueOf(rain));
+//                    Log.d("data", array.toString());
+//                    Log.d("rainObj", rainObj.toString());
+//                    Log.d("rain", String.valueOf(rainObj.getDouble("3h")));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
