@@ -9,9 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -31,11 +29,12 @@ public class MainActivity extends ActionBarActivity {
 
     private ColorDrawable actionbarBg;
     private RequestQueue reqQueue;
-    private static final String weatherUrl = "http://api.openweathermap.org/data/2.5/forecast?id=1850147";
+    private static final String weatherUrl = "http://api.openweathermap.org/data/2.5/forecast?id=1850147&units=metric";
 
-    double rain;
-
-    @InjectView(R.id.textView) TextView textView;
+    @InjectView(R.id.textRain) TextView textRain;
+    @InjectView(R.id.textPlace) TextView textPlace;
+    @InjectView(R.id.textMintemp) TextView textMintemp;
+    @InjectView(R.id.textMaxtemp) TextView textMaxtemp;
     @InjectView(R.id.imageView) ImageView imageView;
 
     @Override
@@ -65,14 +64,28 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    JSONArray array = response.getJSONArray("list");
-                    JSONObject obj = array.getJSONObject(0);
+                    JSONObject cityObj = response.getJSONObject("city");
+                    String cityName = cityObj.getString("name");
+
+                    JSONArray listArray = response.getJSONArray("list");
+                    JSONObject obj = listArray.getJSONObject(0);
                     JSONObject rainObj = obj.getJSONObject("rain");
-                    rain = rainObj.getDouble("3h");
-                    textView.setText(String.valueOf(rain));
-//                    Log.d("data", array.toString());
-//                    Log.d("rainObj", rainObj.toString());
+                    float rain = (float)rainObj.getDouble("3h");
+
+                    JSONObject mainObj = obj.getJSONObject("main");
+                    int temp_min = (int)Math.round(mainObj.getDouble("temp_min"));
+                    int temp_max = (int)Math.round(mainObj.getDouble("temp_max"));
+
+                    textRain.setText(String.valueOf(rain));
+                    textPlace.setText(cityName);
+                    textMintemp.setText("/" + temp_min + "°");
+                    textMaxtemp.setText(temp_max + "°");
+
+                    Log.d("temp", String.valueOf(temp_min));
+                    Log.d("temp", String.valueOf(temp_max));
+                    Log.d("cityName", cityName);
 //                    Log.d("rain", String.valueOf(rainObj.getDouble("3h")));
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
