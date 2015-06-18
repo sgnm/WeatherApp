@@ -1,10 +1,14 @@
 package ti_028.weatherapp;
 
+import android.app.ActionBar;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,12 +29,14 @@ import butterknife.InjectView;
 
 public class MainActivity extends ActionBarActivity {
 
+    private ColorDrawable actionbarBg;
     private RequestQueue reqQueue;
     private static final String weatherUrl = "http://api.openweathermap.org/data/2.5/forecast?id=1850147";
 
     double rain;
 
     @InjectView(R.id.textView) TextView textView;
+    @InjectView(R.id.imageView) ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +44,18 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
 
+        imageView.setImageResource(R.drawable.weather_bg);
+        actionbarBg = new ColorDrawable(Color.parseColor("#ffffff"));
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionbarBg.setAlpha(50);
+            actionBar.setBackgroundDrawable(actionbarBg);
+            Log.d("BAR", "called setBg on actionBar");
+            // ActionBarの高さを引いた値が、背景画像の高さになるので、Activityで設定し直す
+            getWindow().getDecorView().setBackgroundResource(R.drawable.weather_bg);
+        } else {
+            Log.d("BAR", "failed to get actionBar");
+        }
         getWeatherData();
     }
 
