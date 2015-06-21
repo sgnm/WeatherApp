@@ -3,6 +3,7 @@ package ti_028.weatherapp;
 import android.app.ActionBar;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,12 +11,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,11 +31,14 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
 
     private ColorDrawable actionbarBg;
     private RequestQueue reqQueue;
-    private static final String weatherUrl = "http://api.openweathermap.org/data/2.5/forecast?id=1850147&units=metric";
+    private LocationClient mLocClient;
+    private Location mLoc;
+    double lat, lon;
+    private String weatherUrl;
 
     @InjectView(R.id.textRain) TextView textRain;
     @InjectView(R.id.textPlace) TextView textPlace;
@@ -55,7 +64,27 @@ public class MainActivity extends ActionBarActivity {
         } else {
             Log.d("BAR", "failed to get actionBar");
         }
-        getWeatherData();
+
+        int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (result != ConnectionResult.SUCCESS){
+            Toast.makeText(this, "Google Play Services is not avilable (status=" + result + ")", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        mLocClient = new LocationClient(this, this, this);
+
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        mLocClient.connect();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        mLocClient.disconnect();
     }
 
     private void getWeatherData(){
@@ -123,5 +152,28 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mLoc = mLocClient.getLastLocation();
+        lat = mLoc.getLatitude();
+        lon = mLoc.getLongitude();
+        weatherUrl = "http://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&units=metric&APPID=28e8d3ec6ffe8a9653d49bf8cb181c4c";
+        getWeatherData();
+        Log.d("loc", "lat" + mLoc.getLatitude());
+        Log.d("loc", "lon" + mLoc.getLongitude());
+        Log.d("loc", weatherUrl);
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Toast.makeText(this, "位置情報の取得に失敗しました", Toast.LENGTH_SHORT).show();
+        Log.d("ERROR", connectionResult.toString());
+    }
+
+    @Override
+    public void onDisconnected() {
+        Toast.makeText(this, "接続が切れました", Toast.LENGTH_SHORT).show();
     }
 }
