@@ -52,8 +52,8 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/imageView2"
-        android:src="@drawable/sun_icon"
+        android:id="@+id/weatherIcon"
+        android:src="@drawable/cloud"
         android:layout_marginTop="70dp"
         android:layout_below="@+id/textPlace"
         android:layout_centerHorizontal="true" />

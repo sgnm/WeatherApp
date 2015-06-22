@@ -1,0 +1,3 @@
+[submodule "weatherIcon"]
+	path = weatherIcon
+	url = https://github.com/pwittchen/WeatherIconView.git

@@ -45,6 +45,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
     @InjectView(R.id.textMintemp) TextView textMintemp;
     @InjectView(R.id.textMaxtemp) TextView textMaxtemp;
     @InjectView(R.id.imageView) ImageView imageView;
+    @InjectView(R.id.weatherIcon) ImageView weatherIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +110,14 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
                     textPlace.setText(cityName);
                     textMintemp.setText("/" + temp_min + "°");
                     textMaxtemp.setText(temp_max + "°");
+
+                    if (rain < 0.2){
+                        weatherIcon.setImageResource(R.drawable.sun);
+                    } else if (rain < 0.5){
+                        weatherIcon.setImageResource(R.drawable.cloud);
+                    } else {
+                        weatherIcon.setImageResource(R.drawable.rain);
+                    }
 
                     Log.d("temp", String.valueOf(temp_min));
                     Log.d("temp", String.valueOf(temp_max));
