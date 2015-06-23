@@ -1,10 +1,6 @@
 package ti_028.weatherapp;
 
-import android.app.ActionBar;
-import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
@@ -12,9 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.FrameLayout;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,15 +38,23 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
     private RequestQueue reqQueue;
     private LocationClient mLocClient;
     private Location mLoc;
+    private DrawRipple ripple;
     double lat, lon;
     private String weatherUrl;
+    float rain;
 
-    @InjectView(R.id.textRain) TextView textRain;
-    @InjectView(R.id.textPlace) TextView textPlace;
-    @InjectView(R.id.textMintemp) TextView textMintemp;
-    @InjectView(R.id.textMaxtemp) TextView textMaxtemp;
-    @InjectView(R.id.imageView) ImageView imageView;
-    @InjectView(R.id.weatherIcon) ImageView weatherIcon;
+    @InjectView(R.id.textRain)
+    TextView textRain;
+    @InjectView(R.id.textPlace)
+    TextView textPlace;
+    @InjectView(R.id.textMintemp)
+    TextView textMintemp;
+    @InjectView(R.id.textMaxtemp)
+    TextView textMaxtemp;
+    @InjectView(R.id.imageView)
+    ImageView imageView;
+    @InjectView(R.id.weatherIcon)
+    ImageView weatherIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +62,9 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
 
+        ripple = new DrawRipple(this);
+//        setContentView(ripple);
+        addContentView(ripple, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
         imageView.setImageResource(R.drawable.weather_bg);
         actionbarBg = new ColorDrawable(Color.parseColor("#ffffff"));
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
@@ -72,7 +79,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
         }
 
         int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (result != ConnectionResult.SUCCESS){
+        if (result != ConnectionResult.SUCCESS) {
             Toast.makeText(this, "Google Play Services is not avilable (status=" + result + ")", Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -82,18 +89,20 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         mLocClient.connect();
+        ripple.onResume();
     }
 
     @Override
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
         mLocClient.disconnect();
+        ripple.onPause();
     }
 
-    private void getWeatherData(){
+    private void getWeatherData() {
         reqQueue = Volley.newRequestQueue(this);
         Response.Listener<JSONObject> listener = new Response.Listener<JSONObject>() {
             @Override
@@ -105,20 +114,20 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
                     JSONArray listArray = response.getJSONArray("list");
                     JSONObject obj = listArray.getJSONObject(0);
                     JSONObject rainObj = obj.getJSONObject("rain");
-                    float rain = (float)rainObj.getDouble("3h");
+                    rain = (float) rainObj.getDouble("3h");
 
                     JSONObject mainObj = obj.getJSONObject("main");
-                    int temp_min = (int)Math.round(mainObj.getDouble("temp_min"));
-                    int temp_max = (int)Math.round(mainObj.getDouble("temp_max"));
+                    int temp_min = (int) Math.round(mainObj.getDouble("temp_min"));
+                    int temp_max = (int) Math.round(mainObj.getDouble("temp_max"));
 
                     textRain.setText(String.valueOf(rain));
                     textPlace.setText(cityName);
                     textMintemp.setText("/" + temp_min + "°");
                     textMaxtemp.setText(temp_max + "°");
 
-                    if (rain < 0.2){
+                    if (rain < 0.2) {
                         weatherIcon.setImageResource(R.drawable.sun);
-                    } else if (rain < 0.5){
+                    } else if (rain < 0.5) {
                         weatherIcon.setImageResource(R.drawable.cloud);
                     } else {
                         weatherIcon.setImageResource(R.drawable.rain);
@@ -178,6 +187,10 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
         Log.d("loc", "lat" + mLoc.getLatitude());
         Log.d("loc", "lon" + mLoc.getLongitude());
         Log.d("loc", weatherUrl);
+        for (int i = 0; i < 5; i++) {
+            ripple.x[i] = (int) (Math.random() * 800);
+            ripple.y[i] = (int) (Math.random() * 1200);
+        }
     }
 
     @Override
